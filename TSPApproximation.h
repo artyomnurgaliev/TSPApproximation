@@ -51,7 +51,7 @@ public:
         // find all edges that goes from good cycle to bad cycle
         // and has weight 1, connected with bad edge in bad cycle
         int bad_cycle_idx = -1;
-        vector<int> good_connected_cycles;
+        unordered_set<int> good_connected_cycles;
         if (bad_cycles.size() == 1) {
             bad_cycle_idx = *bad_cycles.begin();
             auto &c = this->cycles.at(bad_cycle_idx);
@@ -60,8 +60,9 @@ public:
                     if (another_vertex.second == 1) {
                         int another_cycle_idx = GetCycle(another_vertex.first);
                         auto &another_cycle = this->cycles.at(another_cycle_idx);
-                        if (another_cycle.IsGood()) {
-                            good_connected_cycles.push_back(another_cycle_idx);
+                        if (another_cycle.IsGood() &&
+                            (good_connected_cycles.find(another_cycle_idx) == good_connected_cycles.end())) {
+                            good_connected_cycles.emplace(another_cycle_idx);
                         }
                     }
             }
@@ -92,7 +93,7 @@ public:
             // edge.second.first - index of a cycle
             // edge.second.second - info: index of a vertex in a cycle
             // edge.first - index of a vertex not in a cycle
-            this->cycles.at(GetCycle(edge.first)).SetConnectedEdge(std::make_pair(edge.first, edge.second.second));
+            this->cycles.at(edge.second.first).SetConnectedEdge(std::make_pair(edge.second.second, edge.first));
 
             // Creating directed graph of cycles
             // add inverse edges, not as in text
@@ -111,7 +112,7 @@ public:
 
         while (this->cycles.size() > 1) {
             int second = -1;
-            for (const auto& cycle: this->cycles) {
+            for (const auto &cycle: this->cycles) {
                 if (cycle.first != bad) {
                     second = cycle.first;
                 }
@@ -334,12 +335,18 @@ private:
             }
 
             auto last = first;
-             while (second != last) {
+            while (second != last) {
                 if (connected_edges.find(first) != connected_edges.end()) {
                     if (connected_edges.find(second) != connected_edges.end()) {
                         tspApproximation->JoinThreeCyclesWithRoot(root_cycle,
-                                                                 connected_edges.find(first)->second,
-                                                                 connected_edges.find(second)->second);
+                                                                  connected_edges.find(first)->second,
+                                                                  connected_edges.find(second)->second);
+                        first = second;
+                        second = root.GetSecond(first);
+                        if (second == last) {
+                            first = second;
+                            break;
+                        }
                     } else {
                         tspApproximation->JoinTwoCyclesWithRoot(root_cycle, connected_edges.find(first)->second);
                     }

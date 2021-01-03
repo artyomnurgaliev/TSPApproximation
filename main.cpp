@@ -160,7 +160,7 @@ void Test(int num_vertexes, int num_cycles, int num_good_edges) {
     double approximation_weight = CalcWeight(edges, approximation);
     //cout << "Approximation weight: " << approximation_weight << endl;
 
-    cout << "accuracy: " << approximation_weight / real_weight << endl;
+    cout << approximation_weight / real_weight;
 }
 
 int main(int argc, char** argv) {
@@ -168,4 +168,5 @@ int main(int argc, char** argv) {
     int num_cycles = strtol(argv[2], nullptr, 10);
     int num_good_edges = strtol(argv[3], nullptr, 10);
     Test(num_vertexes, num_cycles, num_good_edges);
+    //Test(40, 4, 40);
 }
