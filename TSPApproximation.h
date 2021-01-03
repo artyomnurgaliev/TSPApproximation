@@ -96,7 +96,7 @@ public:
 
             // Creating directed graph of cycles
             // add inverse edges, not as in text
-            directed_graph.AddEdge(edge.second.first, GetCycle(edge.first));
+            directed_graph.AddEdge(GetCycle(edge.first), edge.second.first);
         }
 
         SplitDirectedGraph();
@@ -121,7 +121,11 @@ public:
         }
 
         auto cycle = this->cycles.at(bad);
-        cycle.Print();
+        approximation = cycle.GetCycle();
+    }
+
+    vector<int> GetApproximation() {
+        return approximation;
     }
 
 private:
@@ -492,6 +496,7 @@ private:
     unordered_map<int, int> vertexes; // value - index of cycle, in which vertex is
     Graph graph;
     unordered_map<int, Cycle> cycles;
+    vector<int> approximation{};
     DirectedGraph directed_graph;
 };
 

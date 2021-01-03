@@ -136,6 +136,18 @@ public:
         }
     }
 
+    vector<int> GetCycle() {
+        vector<int> cycle;
+        auto first = edges.begin()->first;
+        cycle.push_back(first);
+        auto next = edges.find(first)->second;
+        while (next != first) {
+            cycle.push_back(next);
+            next = edges.find(next)->second;
+        }
+        return cycle;
+    }
+
 private:
     unordered_map<int, int> edges; // key - first vertex, value - second
     unordered_map<int, int> inverse_edges; // key - first vertex, value - second
