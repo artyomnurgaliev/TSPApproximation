@@ -233,8 +233,14 @@ private:
                         i = next;
                         if (i == end) return;
                     } else {
-                        ThreeCycles threeCycles(cycle[i], cycle[next], cycle[nextnext]);
-                        threeCycles.JoinCycles(this);
+                        if (used.find(cycle[nextnext]) == used.end()) {
+                            ThreeCycles threeCycles(cycle[i], cycle[next], cycle[nextnext]);
+                            threeCycles.JoinCycles(this);
+                        } else {
+                            SubTree subTree(cycle[i], {cycle[next]});
+                            subTree.JoinCycles(this);
+                        }
+
                         return;
                     }
                 }
@@ -407,17 +413,19 @@ private:
         auto e1 = c1.GetConnectedEdge();
         auto e2 = c2.GetConnectedEdge();
 
+        auto new_end2 = c1.GetSecond(e1.first);
         c1.ChangeEdge(e1.first, e1.second, 1);
         assert(graph.GetEdgeWeight(e1.first, e1.second) == 1);
 
-        c2.ChangeEdge(c2.GetPrev(e1.second), c1.GetSecond(e1.first),
-                      graph.GetEdgeWeight(c2.GetPrev(e1.second), c1.GetSecond(e1.first)));
+        c2.ChangeEdge(c2.GetPrev(e1.second), new_end2,
+                      graph.GetEdgeWeight(c2.GetPrev(e1.second), new_end2));
 
+        auto new_end3 = c2.GetSecond(e2.first);
         c2.ChangeEdge(e2.first, e2.second, 1);
         assert(graph.GetEdgeWeight(e2.first, e2.second) == 1);
 
-        c2.ChangeEdge(c3.GetPrev(e2.second), c2.GetSecond(e2.first),
-                      graph.GetEdgeWeight(c3.GetPrev(e2.second), c2.GetSecond(e2.first)));
+        c3.ChangeEdge(c3.GetPrev(e2.second), new_end3,
+                      graph.GetEdgeWeight(c3.GetPrev(e2.second), new_end3));
 
         c1.AddCycle(c2);
         c1.AddCycle(c3);

@@ -132,8 +132,9 @@ void SplitCycles(vector<vector<int>>& cycles, int num_cycles, vector<vector<int>
  * @param num_vertexes - number of vertexes in a graph
  * @param num_cycles - number of cycles on which permutation is split to calc approximation
  * @param num_good_edges - number of edges of weight 1 in permutation
+ * @param proportion - if >0 than we change additional number of edges to 1 (proportion - number of percents)
  */
-void Test(int num_vertexes, int num_cycles, int num_good_edges) {
+void Test(int num_vertexes, int num_cycles, int num_good_edges, int proportion) {
     assert(num_good_edges <= num_vertexes);
     vector<vector<int>> edges(num_vertexes);
     vector<vector<int>> cycles(1);
@@ -155,6 +156,32 @@ void Test(int num_vertexes, int num_cycles, int num_good_edges) {
     cycles[0] = permutation;
     SplitCycles(cycles, num_cycles, edges);
 
+    if (proportion != -1) {
+        double num_all_good_edges = 0;
+        for (int i = 0; i < edges.size(); ++i) {
+            for (int j = 0; j < edges.size(); ++j) {
+                if (edges[i][j] == 1) {
+                    num_all_good_edges++;
+                }
+            }
+        }
+        int n = num_vertexes * num_vertexes;
+        if (num_all_good_edges / n < proportion / 100.) {
+            for (int i = 0; i < edges.size(); ++i) {
+                for (int j = 0; j < edges.size(); ++j) {
+                    if (num_all_good_edges / n >= proportion / 100.) {
+                        break;
+                    } else {
+                        if (edges[i][j] != 1) {
+                            edges[i][j] = 1;
+                            num_all_good_edges++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     TSPApproximation tspApproximation(edges, cycles);
     vector<int> approximation = tspApproximation.GetApproximation();
     double approximation_weight = CalcWeight(edges, approximation);
@@ -167,6 +194,11 @@ int main(int argc, char** argv) {
     int num_vertexes = strtol(argv[1], nullptr, 10);
     int num_cycles = strtol(argv[2], nullptr, 10);
     int num_good_edges = strtol(argv[3], nullptr, 10);
-    Test(num_vertexes, num_cycles, num_good_edges);
-    //Test(40, 4, 40);
+
+    int proportion = -1;
+    if (argc == 5) {
+        proportion = strtol(argv[4], nullptr, 10);
+    }
+
+    Test(num_vertexes, num_cycles, num_good_edges, proportion);
 }

@@ -28,7 +28,7 @@ public:
     explicit Cycle(vector<int> vertexes, const Graph &graph) : connected_edge(std::pair<int, int>(-1, -1)){
         for (int i = 1; i < vertexes.size(); ++i) {
             edges.emplace(vertexes[i - 1], vertexes[i]);
-            inverse_edges.emplace(vertexes[i], vertexes[i-1]);
+            inverse_edges.emplace(vertexes[i], vertexes[i - 1]);
             if (graph.GetEdgeWeight(vertexes[i - 1], vertexes[i]) == HEAVY_EDGE) {
                 heavy_edges.emplace(vertexes[i - 1]);
             }
@@ -143,6 +143,7 @@ public:
         auto next = edges.find(first)->second;
         while (next != first) {
             cycle.push_back(next);
+            assert(cycle.size() <= this->edges.size());
             next = edges.find(next)->second;
         }
         return cycle;
